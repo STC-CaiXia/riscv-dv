@@ -138,7 +138,10 @@ class riscv_instr_sequence extends uvm_sequence;
     int branch_target[int] = '{default: 0};
     // Insert directed instructions, it's randomly mixed with the random instruction stream.
     foreach (directed_instr[i]) begin
-      instr_stream.insert_instr_stream(directed_instr[i].instr_list);
+      if(cfg.instr_stream_not_mix)
+        instr_stream.insert_instr_stream(directed_instr[i].instr_list, 0);
+      else
+        instr_stream.insert_instr_stream(directed_instr[i].instr_list);      
     end
     // Assign an index for all instructions, these indexes won't change even a new instruction
     // is injected in the post process.
