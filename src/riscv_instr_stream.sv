@@ -26,8 +26,10 @@ class riscv_instr_stream extends uvm_object;
   // User can specify a small group of available registers to generate various hazard condition
   rand riscv_reg_t      avail_regs[];
   // Some additional reserved registers that should not be used as rd register
+  rand riscv_fpr_t      avail_fregs[];
   // by this instruction stream
   riscv_reg_t           reserved_rd[];
+  riscv_fpr_t           reserved_fd[];
   int                   hart;
 
   `uvm_object_utils(riscv_instr_stream)
