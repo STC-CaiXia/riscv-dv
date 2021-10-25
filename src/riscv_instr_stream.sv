@@ -200,6 +200,17 @@ class riscv_rand_instr_stream extends riscv_instr_stream;
     end
   endfunction
 
+ virtual function void randomize_avail_fregs();
+    if(avail_fregs.size() > 0) begin
+      `DV_CHECK_STD_RANDOMIZE_WITH_FATAL(avail_fregs,
+                                         unique{avail_fregs};
+                                         avail_fregs[0] inside {[FT0 : FT11]};
+                                         foreach(avail_fregs[i]) {
+                                           !(avail_fregs[i] inside {cfg.reserved_fregs, reserved_fd});
+                                         },
+                                         "Cannot randomize avail_fregs")
+    end
+  endfunction
   function void setup_instruction_dist(bit no_branch = 1'b0, bit no_load_store = 1'b1);
     if (cfg.dist_control_mode) begin
       category_dist = cfg.category_dist;
@@ -283,6 +294,32 @@ class riscv_rand_instr_stream extends riscv_instr_stream;
         }
       }
       // TODO: Add constraint for CSR, floating point register
+    )
+  endfunction
+          
+  function void randomize_fpr(riscv_instr instr);
+    `DV_CHECK_RANDOMIZE_WITH_FATAL(instr,
+      if (avail_fregs.size() > 0) {
+        if (has_fs1) {
+          fs1 inside {avail_fregs};
+        }
+        if (has_fs2) {
+          fs2 inside {avail_fregs};
+        }
+        if (has_fd) {
+          fd  inside {avail_fregs};
+        }
+      }
+      foreach (reserved_fd[i]) {
+        if (has_fd) {
+          fd != reserved_fd[i];
+        }
+      }
+      foreach (cfg.reserved_fregs[i]) {
+        if (has_fd) {
+          fd != cfg.reserved_fregs[i];
+        }
+      }
     )
   endfunction
 
